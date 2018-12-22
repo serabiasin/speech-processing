@@ -1,5 +1,6 @@
 #! /usr/env/bin python3
 
+import muda
 import argparse
 import os
 import sys
@@ -35,3 +36,7 @@ sub_dir=[]
 for file in os.listdir(Direktori):
     if os.path.isdir(file):
         sub_dir.append(file)
+
+print(range(sub_dir))
+# for sub_dir in variable:
+#     pass
