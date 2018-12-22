@@ -33,10 +33,10 @@ args = parser.parse_args()
 Direktori=args.dir
 
 sub_dir=[]
-for file in os.listdir(Direktori):
-    if os.path.isdir(file):
-        sub_dir.append(file)
+for folder in os.listdir(Direktori):
+    if os.path.isdir(os.path.join(Direktori,folder)):
+        sub_dir.append(folder)
+    elif os.path.isfile(folder):
+        pass
 
-print(range(sub_dir))
-# for sub_dir in variable:
-#     pass
+print(sub_dir)
