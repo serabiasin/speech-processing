@@ -94,7 +94,7 @@ membuat noise dari satu buah file
 
 def beginProcess(direktori,namaFile):
   target=os.path.join(direktori,namaFile)
-  for sequence in range(1,301):
+  for sequence in range(1,81):
     #avoid overflow,using random constant instead linear constant
     konstanta=np.random.rand()*sequence
     #bikin noise
