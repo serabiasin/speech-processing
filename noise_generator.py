@@ -1,30 +1,117 @@
 #! /usr/env/bin python3
 
-import muda
 import argparse
 import os
 import sys
 import glob
 import pickle
 import numpy as np
+import scipy
+import librosa
 
 
 """
 generateNoise
-deskripsi :
+@parameter
+
+file : file yang akan di augmentasi data nya
+const -> konstanta yang berperan sebagai scalar vector untuk membuat noise
+
+@deskripsi
 membuat noise dari satu buah file
 
-parameter
-file : file yang akan di augmentasi data nya
+"""
+def generateNoise(dataSuara,const=0.005):
+  dataSuara=dataSuara.astype('float32')
+  noise=np.random.normal(size=len(dataSuara))
+  dataModif=dataSuara+const*noise
+  #normalisasi
+  m = np.max(np.abs(dataModif))
+  dataModif = (dataModif/m).astype(np.float32)
+
+  return dataModif
+
 
 
 """
-# Implemented Soon
-def generateNoise(file):
-    pass
+readFile
 
-def readFile(arg):
-    pass
+@parameter
+path  -> lokasi wav file
+
+@deskripsi :
+mengubah file binary wav menjadi vector
+
+@return value :
+float32 dalam bentuk vector
+"""
+
+def readFile(path):
+    return scipy.io.wavfile.read(path)
+
+
+"""
+vecTofile
+
+@parameter
+
+targetPath      -> target Direktori
+
+fileName        -> nama file yang akan di augmentasi
+
+sekuen          -> merupakan proses ke - n dari augmentasi
+
+data            -> data vector yang telah di augmentasi oleh noise generator
+
+samplingRate    -> frame Rate dari sebuah data wav
+
+@deskripsi :
+mengubah data Vector menjadi sebuah file wav
+
+
+"""
+def vecTofile(targetPath,fileName,sekuen,data,samplingRate=16000):
+  namafile=fileName+'-'+str(sekuen)+'.wav'
+  target=os.path.join(targetPath,namafile)
+  print("File : ",fileName," Created : "," To : ",namafile)
+  scipy.io.wavfile.write(target, samplingRate, data)
+
+
+"""
+beginProcess
+
+@parameter
+
+direktori       -> target direktori yang akan di augmentasi
+
+namafile        -> nama file yang akan di augmentasi
+
+@deskripsi :
+membuat noise dari satu buah file
+
+"""
+
+
+def beginProcess(direktori,namaFile):
+  target=os.path.join(direktori,namaFile)
+  for sequence in range(1,301):
+    #avoid overflow,using random constant instead linear constant
+    konstanta=np.random.rand()*sequence
+    #bikin noise
+    print(target)
+    sr,buffer=readFile(target)
+    if sr==16000:
+      konstanta=konstanta*sequence
+      hasil=generateNoise(buffer,konstanta)
+      #tulis file
+      print(direktori)
+      print(namaFile[:-4])
+      vecTofile(direktori,namaFile[:-4],sequence,hasil)
+    else:
+      print("Gagal Melakukan Proses (Sampling rate harus 16KHz)")
+      print("Error File at :",target)
+      break
+
 
 direktori_root=""
 
@@ -46,6 +133,5 @@ for index in range(len(sub_dir)):
     for data in os.listdir(os.path.join(Direktori,sub_dir[index])):
         buffer=os.path.join(Direktori,sub_dir[index])
         if os.path.isfile(os.path.join(buffer,data)):
-            print(os.path.join(buffer,data))
             # disini buat proses noise generator
-            
+            beginProcess(buffer,data)
