@@ -90,13 +90,11 @@ namafile        -> nama file yang akan di augmentasi
 membuat noise dari satu buah file
 
 """
-
-
 def beginProcess(direktori,namaFile):
   target=os.path.join(direktori,namaFile)
-  for sequence in range(1,81):
+  for sequence in range(1,201):
     #avoid overflow,using random constant instead linear constant
-    konstanta=np.random.rand()*sequence
+    konstanta=np.random.randint(low=0.05, high=105, size=1)
     #bikin noise
     print(target)
     sr,buffer=readFile(target)
@@ -104,8 +102,6 @@ def beginProcess(direktori,namaFile):
       konstanta=konstanta*sequence
       hasil=generateNoise(buffer,konstanta)
       #tulis file
-      print(direktori)
-      print(namaFile[:-4])
       vecTofile(direktori,namaFile[:-4],sequence,hasil)
     else:
       print("Gagal Melakukan Proses (Sampling rate harus 16KHz)")
