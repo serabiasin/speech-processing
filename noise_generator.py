@@ -94,12 +94,11 @@ def beginProcess(direktori,namaFile):
   target=os.path.join(direktori,namaFile)
   for sequence in range(1,201):
     #avoid overflow,using random constant instead linear constant
-    konstanta=np.random.randint(low=0.05, high=105, size=1)
+    konstanta=np.random.randint(low=10.05, high=90.5, size=1)
     #bikin noise
     print(target)
     sr,buffer=readFile(target)
     if sr==16000:
-      konstanta=konstanta*sequence
       hasil=generateNoise(buffer,konstanta)
       #tulis file
       vecTofile(direktori,namaFile[:-4],sequence,hasil)
