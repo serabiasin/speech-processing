@@ -22,7 +22,7 @@ def getSpectrogram(vector,fs):
 
 direktori_root=""
 
-parser = argparse.ArgumentParser(description='Tools untuk membuat Noise pada file wav')
+parser = argparse.ArgumentParser(description='Tools untuk mengambil data suara dalam domain frekuensi')
 parser.add_argument('--dir', help="Target Direktori ")
 
 args = parser.parse_args()
