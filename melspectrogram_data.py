@@ -20,13 +20,16 @@ def getSpectrogram(vector,fs):
 
 
 
-direktori_root=""
+
 
 parser = argparse.ArgumentParser(description='Tools untuk mengambil data suara dalam domain frekuensi')
 parser.add_argument('--dir', help="Target Direktori ")
+parser.add_argument('--out', help="Output File Direktori ")
 
 args = parser.parse_args()
 Direktori=args.dir
+Output_dat=args.out
+
 
 sub_dir=[]
 X=[]
@@ -55,7 +58,6 @@ print(np.asarray(Y))
 
 Y=np.asarray(Y)
 X=np.asarray(X)
-Direktori="/content/drive/My Drive/percobaan/"
-np.save(Direktori+'/data_latihSpectro'+'.npy',X)
-np.save(Direktori+'labelSpectro'+'.npy',Y)
+np.save(Output_dat+'/data_latihSpectro'+'.npy',X)
+np.save(Output_dat+'labelSpectro'+'.npy',Y)
 print("done")
