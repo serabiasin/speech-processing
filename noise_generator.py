@@ -10,12 +10,13 @@ import scipy
 import librosa
 
 
+
 """
 generateNoise
 @parameter
 
-file : file yang akan di augmentasi data nya
-const -> konstanta yang berperan sebagai scalar vector untuk membuat noise
+file    ->    file yang akan di augmentasi data nya
+const   ->    konstanta yang berperan sebagai scalar vector untuk membuat noise
 
 @deskripsi
 membuat noise dari satu buah file
@@ -23,7 +24,7 @@ membuat noise dari satu buah file
 """
 def generateNoise(dataSuara,const=0.005):
   dataSuara=dataSuara.astype('float32')
-  noise=np.random.normal(size=len(dataSuara))
+  noise=np.random.normal(loc=0.2,size=len(dataSuara))
   dataModif=dataSuara+const*noise
   #normalisasi
   m = np.max(np.abs(dataModif))
@@ -73,9 +74,75 @@ mengubah data Vector menjadi sebuah file wav
 def vecTofile(targetPath,fileName,sekuen,data,samplingRate=16000):
   namafile=fileName+'-'+str(sekuen)+'.wav'
   target=os.path.join(targetPath,namafile)
-  print("File : ",fileName," Created : "," To : ",namafile)
+  print("File : ",fileName," Created : "," To : ",target)
   scipy.io.wavfile.write(target, samplingRate, data)
 
+
+"""
+addReverbEffect
+
+@parameter
+
+dataSuara           ->  dataSuara berupa vector
+
+hfdampingConst      ->  konstanta high frequency damping
+
+reverbConst         ->  konstanta reverbation
+
+room_scaleConst     ->  konstanta untuk visualisasi skala ruangan
+                        (ukuran ruangan)
+
+gainConst           ->  konstanta untuk melakukan penguatan atau pelemahan
+                        range (-10 hingga 10 dB)
+
+@deskripsi  :
+proses penambahan efek reverb
+
+@return value :
+berupa nilai vektor,hasil efek manipulasi reverb dengan
+parameter yang telah disediakan
+
+"""
+def addReverbEffect(dataSuara,hfdampingConst,reverbConst,room_scaleConst,gainConst=0):
+  fx = (AudioEffectsChain().reverb( hf_damping=hfdampingConst,
+                                   room_scale=room_scaleConst,
+                                   reverberance=reverbConst,wet_gain=gainConst))
+
+  return fx(dataSuara)
+
+
+"""
+reverbanceAugmentation
+
+@parameter
+
+direktori           -> target Direktori
+
+namaFile            -> nama file
+
+@deskripsi
+
+Proses melakukan pemindaian file dan direktori,setelah diperoleh data direktori
+akan dilakukan proses manipulasi efek oleh fungsi addReverbEffect,setelah
+diperoleh nilai vektor dari fungsi tersebut akan di konversi menjadi file
+berformat wav
+
+"""
+def reverbanceAugmentation(direktori,namaFile):
+  target=os.path.join(direktori,namaFile)
+  for sequence in range(0,50):
+    sr,buffer=readFile(target)
+    hfdampingConst=np.random.uniform(low=10, high=100)
+    reverbConst=np.random.uniform(low=10, high=100)
+    room_scaleConst=np.random.uniform(low=10, high=100)
+    gainConst=np.random.uniform(low=1, high=10)
+    if sr==16000:
+      hasil=addReverbEffect(buffer,hfdampingConst,reverbConst,room_scaleConst,gainConst)
+      vecTofile(direktori,namaFile[:-4],sequence,hasil)
+    else:
+      print("Gagal Melakukan Proses..")
+      print("Error File at : ",target)
+      break
 
 """
 beginProcess
@@ -92,11 +159,10 @@ membuat noise dari satu buah file
 """
 def beginProcess(direktori,namaFile):
   target=os.path.join(direktori,namaFile)
-  for sequence in range(1,201):
+  for sequence in range(0,10):
     #avoid overflow,using random constant instead linear constant
-    konstanta=np.random.randint(low=10.05, high=90.5, size=1)
+    konstanta=np.random.uniform(low=10, high=95)
     #bikin noise
-    print(target)
     sr,buffer=readFile(target)
     if sr==16000:
       hasil=generateNoise(buffer,konstanta)
@@ -106,7 +172,6 @@ def beginProcess(direktori,namaFile):
       print("Gagal Melakukan Proses (Sampling rate harus 16KHz)")
       print("Error File at :",target)
       break
-
 
 direktori_root=""
 
@@ -123,10 +188,18 @@ for folder in os.listdir(Direktori):
     elif os.path.isfile(os.path.join(Direktori,folder)):
         pass
 
+#white noise addition
 for index in range(len(sub_dir)):
     print(sub_dir[index])
     for data in os.listdir(os.path.join(Direktori,sub_dir[index])):
         buffer=os.path.join(Direktori,sub_dir[index])
         if os.path.isfile(os.path.join(buffer,data)):
-            # disini buat proses noise generator
             beginProcess(buffer,data)
+
+# Reverb Noise addition
+for index in range(len(sub_dir)):
+    print(sub_dir[index])
+    for data in os.listdir(os.path.join(Direktori,sub_dir[index])):
+        buffer=os.path.join(Direktori,sub_dir[index])
+        if os.path.isfile(os.path.join(buffer,data)):
+            reverbanceAugmentation(buffer,data)
